@@ -33,7 +33,4 @@ export class CardSearch {
       request.send();
     });
   }
-
-
-
 }

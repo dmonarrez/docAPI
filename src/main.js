@@ -7,6 +7,8 @@ import { CardSearch } from './backEnd.js';
 
 $(document).ready(function() {
 
+  let cardsArr = [];
+
   const api = new CardSearch;
   let counter = 1;
   $("#add").click(function(){
@@ -30,44 +32,54 @@ $(document).ready(function() {
       <input type="text" id="input${counter}">`);
   });
 
+  $("#remove").click(function(){
+    $(`.searchTerms${counter}`).remove();
+    $(`#input${counter}`).remove();
+    counter--;
+  });
+
   $(".search").submit(function(event){
     event.preventDefault();
+    //reset cards arr after new search
+    cardsArr = [];
+
+    $(".list").text("");
 
     let searchParameters = '';
-    for(let i=1; i <= counter; i++){
+    for(let i = 1; i <= counter; i++){
       searchParameters += $(`.searchTerms${i}`).val() + '=' + $(`#input${i}`).val() + '&';
     }
 
     const getCards = api.getCard(searchParameters);
 
+
     getCards.then(function(response) {
       let body = JSON.parse(response);
-      body.cards.forEach(function(card){
-        $(".list").append(`<p id="${card.id}">${card.name}</p>`);
+      // console.log(body);
+      body.cards.forEach(function(card, index){
+        $(".list").append(`<img id="${index}" src="${card.imageUrl}">`);
+        // console.log(card);
+        cardsArr.push(card);
       });
     }, function(error) {
       $('.showErrors').text(`There was an error processing your request: ${error.message}`);
     });
+    console.log(cardsArr);
   });
 
-  $('.list').on('click', 'p', function(){
-    if(this.classList.contains('open')){
-      console.log('close');
-    } else {
-      const id = this.id;
-      const search = `id=${id}`;
-      console.log(search);
 
-      const getCard = api.getCard(search);
+  // will be expand functionality to show the rest of the card information
+  $('.list').on('click', 'img', function(){
+    const name = cardsArr[this.id].name
+    // const rarity = cardsArr[this.id].rarity
+    // const name = cardsArr[this.id].name
+    // const name = cardsArr[this.id].name
+    // const name = cardsArr[this.id].name
+    // const name = cardsArr[this.id].name
+    console.log(name);
+    $("#exampleModalLongTitle").text(name);
+    $("#exampleModalCenter").modal('toggle');
 
-      getCard.then(function(response) {
-        let body = JSON.parse(response);
-        $(".list").append(`<img src="${body.cards[0].imageUrl}">`);
-      }, function(error) {
-        $('.showErrors').text(`There was an error processing your request: ${error.message}`);
-      });
-    }
-    $(this).toggleClass('open');
   });
 
 });
