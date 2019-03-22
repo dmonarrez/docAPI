@@ -7,6 +7,28 @@ import { DocSearch } from './backEnd.js';
 
 $(document).ready(function() {
 
+  //const api = new DocSearch;
+
+ $('#call').click(function(event) {
+   console.log('submit worked');
+   event.preventDefault();
+
+   let request = new XMLHttpRequest();
+   let url = `https://api.betterdoctor.com/2016-03-01/doctors?location=37.773%2C-122.413%2C100&user_location=37.773%2C-122.413&skip=0&limit=10&user_key=${process.env.apiKey}`
+
+   request.onreadystatechange = function() {
+      if (this.readyState === 4 && this.status === 200) {
+        const response = JSON.parse(this.responseText);
+        console.log(response);
+      } else {
+        console.log('not ready');
+      }
+    }
+
+    request.open("GET", url, true);
+    request.send();
+
+ });
 
 
 
