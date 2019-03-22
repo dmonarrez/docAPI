@@ -1,11 +1,15 @@
 export class Doctor {
-  constructor(firstName, lastName, address, phone, website, newPatients) {
+  constructor(firstName, lastName, practicesArr, phone, website, newPatients) {
     this.firstName = firstName;
     this.lastName = lastName;
-    this.address = address;
+    this.practices = practicesArr;
     this.phone = phone;
     this.website = website;
     this.newPatients = newPatients;
+  }
+
+  sortPractices(practicesArray) {
+
   }
 
 }
