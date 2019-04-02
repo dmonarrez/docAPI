@@ -1,7 +1,5 @@
 export class Doctor {
-  constructor() {
 
-  }
   docSearch(firstName, lastName, query) {
     return new Promise(function(resolve, reject) {
       let request = new XMLHttpRequest();
