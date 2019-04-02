@@ -6,64 +6,45 @@ import { Doctor } from './backEnd.js';
 
 
 $(document).ready(function() {
-  //call api for list of conditions on page load
-  let conditionsRequest = new XMLHttpRequest();
-  let urlConditions = `https://api.betterdoctor.com/2016-03-01/conditions?user_key=516c164ae2d246c222625a09b6daf207`
-
-  conditionsRequest.onreadystatechange = function() {
-    // console.log('request reached');
-     if (this.readyState === 4 && this.status === 200) {
-       const response = JSON.parse(this.responseText);
-       console.log(response.data);
-       } else {
-       console.log(this.readyState);
-     }
-   }
-
-   conditionsRequest.open("GET", urlConditions, true);
-   conditionsRequest.send();
-
-
+  //code on page load
  $('.search').submit(function(event) {
-   // console.log('submit start');
    event.preventDefault();
 
+   $(".result").empty();
 
-   let docObjsArr = [];
+   let doc = new Doctor;
+   let firstName = $('#firstNameInput').val();
+   let lastName = $('#lastNameInput').val();
+   let condition = $('#conditionInput').val();
 
-   const searchFirstName = $('#firstNameInput').val();
-   const query = $('#conditionInput').val();
-   console.log(query);
+   const docList = [];
+   const getDocs = doc.docSearch(firstName, lastName, condition);
 
-
-   let request = new XMLHttpRequest();
-   let urlDocs = `https://api.betterdoctor.com/2016-03-01/doctors?query=${query}&location=or-portland&user_location=45.512%2C%20122.658&skip=0&limit=10&user_key=${process.env.apiKey}`
-
-   request.onreadystatechange = function() {
-     // console.log('request reached');
-      if (this.readyState === 4 && this.status === 200) {
-        const response = JSON.parse(this.responseText);
-        console.log(response.data);
-        response.data.forEach(function(doc){
-          const doctor = new Doctor;
-          doctor.firstName = doc.profile.first_name;
-          doctor.lastName = doc.profile.last_name;
-          doctor.practices = doc.practices;
-          //console.log(doc);
-          docObjsArr.push(doctor);
-        });
+   getDocs.then(function(response) {
+      let readable = JSON.parse(response);
+      console.log(readable);
+      if (readable.meta.count === 0) {
+        $(".result").append("There are no results for this search");
       } else {
-        // console.log('not ready');
+        readable.data.forEach(function(index){
+          docList.push(index.profile.bio);
+          $(".result").append(`<h3>${index.profile.first_name} ${index.profile.last_name}</h3>`);
+          index.practices.forEach(function(locations){
+            if (locations.accepts_new_patients === true) {
+              $(".result").append(`${locations.visit_address.street}, ${locations.visit_address.city}, ${locations.visit_address.state}  ${locations.visit_address.zip} <br>${locations.phones[0].number}<br>`);
+            }else {
+              $(".result").append("This doctor is not currently accepting new patients");
+            }
+            if (locations.website !=undefined) {
+              $(".result").append(`<br>${locations.website}<br>`);
+            }
+          });
+        });
       }
-    }
-
-    request.open("GET", urlDocs, true);
-    request.send();
-    // console.log('open send');
-    // console.log(docObjsArr);
-
-    // request.send();
-    // console.log(docObjsArr);
+    }, function(error) {
+      $('.showErrors').text(`There was an error processing your request: ${error.message}`);
+    });
+   $('.result').show();
+   $('input').val('');
  });
-
 });
